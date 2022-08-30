@@ -1,33 +1,78 @@
 package kv
 
 import (
-	"context"
 	"fmt"
 	"time"
 
 	badger "github.com/dgraph-io/badger/v3"
-	"go.k6.io/k6/js/common"
+	"github.com/dop251/goja"	
 	"go.k6.io/k6/js/modules"
 )
 
-func init() {
-	modules.Register("k6/x/kv", new(KV))
-}
+type (
+	// KV is the global module instance that will create Client
+	// instances for each VU.
+	KV struct{}
 
-// KV is the k6 key-value extension.
-type KV struct{}
+	// ModuleInstance represents an instance of the JS module.
+	ModuleInstance struct {
+		vu modules.VU
+		*Client
+	}
+)
+
+// Ensure the interfaces are implemented correctly
+var (
+	_ modules.Instance = &ModuleInstance{}
+	_ modules.Module   = &KV{}
+)
 
 type Client struct {
-	db *badger.DB
+	vu      modules.VU
+	db 	*badger.DB
 }
 
 var check = false
 var client *Client
 
-// XClient represents the Client constructor (i.e. `new kv.Client()`) and
-// returns a new Key Value client object.
-func (r *KV) XClient(ctxPtr *context.Context, name string, memory bool) interface{} {
-	rt := common.GetRuntime(*ctxPtr)
+func init() {
+	modules.Register("k6/x/kv", new(KV))	
+}
+
+// New returns a pointer to a new KV instance
+func New() *KV {
+	return &KV{}
+}
+
+// NewModuleInstance implements the modules.Module interface and returns
+// a new instance for each VU.
+func (*KV) NewModuleInstance(vu modules.VU) modules.Instance {
+	return &ModuleInstance{vu: vu, Client: &Client{vu: vu}}
+}
+
+// Exports implements the modules.Instance interface and returns
+// the exports of the JS module.
+func (mi *ModuleInstance) Exports() modules.Exports {
+	return modules.Exports{Named: map[string]interface{}{
+		"Client": mi.NewClient,
+	}}
+}
+
+// NewClient is the JS constructor for the Client
+func (mi *ModuleInstance) NewClient(call goja.ConstructorCall) *goja.Object {	
+	rt := mi.vu.Runtime()
+
+	var name string = ""
+	var memory bool = false
+	if len(call.Arguments) == 1 {
+		name = call.Arguments[0].String()		
+	}
+
+	if len(call.Arguments) == 2 {
+		name = call.Arguments[0].String()
+		memory = call.Arguments[1].ToBoolean()		
+	}
+
 	if check != true {
 		if name == "" {
 			name = "/tmp/badger"
@@ -38,13 +83,11 @@ func (r *KV) XClient(ctxPtr *context.Context, name string, memory bool) interfac
 		} else {
 			db, _ = badger.Open(badger.DefaultOptions(name).WithLoggingLevel(badger.ERROR))
 		}
-		client = &Client{db: db}
+		client = &Client{vu:mi.vu,db: db}
 		check = true
-		return common.Bind(rt, client, ctxPtr)
-	} else {
-		return common.Bind(rt, client, ctxPtr)
 	}
 
+	return rt.ToValue(client).ToObject(rt)
 }
 
 // Set the given key with the given value.

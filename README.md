@@ -1,5 +1,8 @@
 # xk6-kv
 
+> :speaker: NOTICE: This is a fork of [xk6-kv](https://github.com/dgzlopes/xk6-kv) with the implementation of the new K6 module API.
+
+
 This is a [k6](https://go.k6.io/k6) extension using the [xk6](https://github.com/grafana/xk6) system.
 
 | :exclamation: This is a proof of concept, isn't supported by the k6 team, and may break in the future. USE AT YOUR OWN RISK! |
