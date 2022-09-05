@@ -1,6 +1,6 @@
-module github.com/dgzlopes/xk6-kv
+module github.com/j-etienne/xk6-kv
 
-go 1.17
+go 1.18
 
 require (
 	github.com/dop251/goja v0.0.0-20220405120441-9037c2b61cbf
