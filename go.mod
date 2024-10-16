@@ -1,9 +1,9 @@
-module github.com/dgzlopes/xk6-kv
+module github.com/j-etienne/xk6-kv
 
 go 1.18
 
 require (
-	github.com/dop251/goja v0.0.0-20220405120441-9037c2b61cbf
+	github.com/grafana/sobek v0.0.0-20240607083612-4f0cd64f4e78
 	github.com/stretchr/testify v1.7.0
 	go.k6.io/k6 v0.39
 	gopkg.in/guregu/null.v3 v3.5.0
