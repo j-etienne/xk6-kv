@@ -5,7 +5,7 @@ import (
 	"time"
 
 	badger "github.com/dgraph-io/badger/v4"
-	"github.com/dop251/goja"	
+	"github.com/grafana/sobek"	
 	"go.k6.io/k6/js/modules"
 )
 
@@ -63,7 +63,7 @@ func (mi *ModuleInstance) Exports() modules.Exports {
 // 	1 arg :  kv_name
 //	2 args : kv_name, filename
 // If filename="" then memory=true
-func (mi *ModuleInstance) NewClient(call goja.ConstructorCall) *goja.Object {	
+func (mi *ModuleInstance) NewClient(call sobek.ConstructorCall) *sobek.Object {	
 	rt := mi.vu.Runtime()
 
 	var name string = ""
